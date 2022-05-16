@@ -1,4 +1,5 @@
 import 'package:bmi/constants/constant.dart';
+import 'package:bmi/helpers/bmi_calculator.dart';
 import 'package:bmi/views/bmi_data_screen.dart';
 import 'package:flutter/material.dart';
 
@@ -7,77 +8,45 @@ class BmiResultScreen extends StatelessWidget {
 
   final double bmi;
 
-// kategori
-  String determineBmiCategory(double bmiValue) {
-    String category = "";
-    if (bmiValue < 16.0) {
-      category = underWeightSevere;
-    } else if (bmiValue < 17) {
-      category = underWeightModerete;
-    } else if (bmiValue < 18.5) {
-      category = underWeightMild;
-    } else if (bmiValue < 25) {
-      category = normal;
-    } else if (bmiValue < 30) {
-      category = overweight;
-    } else if (bmiValue < 35) {
-      category = obeseI;
-    } else if (bmiValue < 40) {
-      category = obeseII;
-    } else if (bmiValue >= 40) {
-      category = obeseIII;
-    }
-
-    return category;
-  }
-
-  // Keterangan Kategori
-  String getHealthRiskDescription(String categoryName) {
-    String desc = "";
-
-    switch (categoryName) {
-      case underWeightSevere:
-      case underWeightModerete:
-      case underWeightMild:
-        desc = "Kemungkinan kekurangan nutrisi dan pengkroposan tulang";
-        break;
-      case normal:
-        desc = "Resiko Rendah(Sehat)";
-        break;
-      case overweight:
-        desc =
-            "Risiko terkena penyakit jantung, tekanan darah tinggi, stroke dan diabetes militus";
-        break;
-      case obeseI:
-      case obeseII:
-      case obeseIII:
-        desc =
-            "Risiko tinggi terkena penyakit jantung, tekanan darah tinggi, stroke, diabetes mellitus, sindrom metabolisme";
-        break;
-      default:
-    }
-
-    return desc;
-  }
-
   @override
   Widget build(BuildContext context) {
-    final bmiCategory = determineBmiCategory(bmi);
-    final bmiDesc = getHealthRiskDescription(bmiCategory);
+    final BmiCalculator bmiCalculator = BmiCalculator.fromBmiValue(bmi);
+
+    bmiCalculator.determineBmiCategory();
+    bmiCalculator.getHealthRiskDescription();
 
     return Scaffold(
       appBar: AppBar(
-        title: Text("Hasil Hitung "),
+        title: const Text("Hasil Hitung "),
+      ),
+      bottomNavigationBar: GestureDetector(
+        onTap: () {
+          Navigator.pop(context);
+        },
+        child: Container(
+          height: 60,
+          margin: EdgeInsets.all(15),
+          decoration: BoxDecoration(
+              color: const Color(0xff517df6),
+              borderRadius: BorderRadius.circular(8)),
+          child: Center(
+            child: Text(
+              "Hitung Ulang",
+              style: labelTextStyle.copyWith(
+                fontSize: 28,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ),
       ),
       body: Column(
         children: [
           Expanded(
-            child: Container(
-              child: Center(
-                child: Text(
-                  "Hasil Perhitungan",
-                  style: result,
-                ),
+            child: Center(
+              child: Text(
+                "Hasil Perhitungan",
+                style: result,
               ),
             ),
           ),
@@ -91,7 +60,7 @@ class BmiResultScreen extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
                     Text(
-                      bmiCategory,
+                      bmiCalculator.bmiCategory ?? "",
                       style: result.copyWith(
                         fontSize: 25,
                         fontWeight: FontWeight.normal,
@@ -99,13 +68,13 @@ class BmiResultScreen extends StatelessWidget {
                       textAlign: TextAlign.center,
                     ),
                     Text(
-                      "${bmi.toStringAsFixed(1)}",
+                      bmi.toStringAsFixed(1),
                       style: result.copyWith(
                         fontSize: 90,
                       ),
                     ),
                     Text(
-                      bmiDesc,
+                      bmiCalculator.bmiDescription ?? "",
                       style: result.copyWith(
                         fontSize: 25,
                         fontWeight: FontWeight.normal,
@@ -117,24 +86,6 @@ class BmiResultScreen extends StatelessWidget {
               ),
             ),
           ),
-          GestureDetector(
-            onTap: () {
-              Navigator.pop(context);
-            },
-            child: Container(
-              height: 80,
-              color: Color(0xffec3c66),
-              child: Center(
-                child: Text(
-                  "Hitung Ulang",
-                  style: labelTextStyle.copyWith(
-                    fontSize: 28,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-            ),
-          )
         ],
       ),
     );
